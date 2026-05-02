@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: taskuser
+      POSTGRES_PASSWORD: taskpassword
+      POSTGRES_DB: taskdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    environment:
+      - SPRING_PROFILES_ACTIVE=postgres
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=taskdb
+      - DB_USER=taskuser
+      - DB_PASS=taskpassword
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

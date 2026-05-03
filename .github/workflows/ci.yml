@@ -191,3 +191,73 @@ jobs:
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
           VERSION: ${{ steps.version.outputs.version }}
         run: just docker-build-push backend
+      # ---------------------------------------------------------
+      # Update Kubernetes manifests repository
+      # ---------------------------------------------------------
+
+      - name: Checkout manifests repository
+        if: ${{ steps.version.outputs.released == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          repository: tua-org/app-manifests
+          ref: main
+          token: ${{ secrets.MANIFESTS_REPO_TOKEN }}
+          path: manifests
+
+      - name: Install kustomize
+        if: ${{ steps.version.outputs.released == 'true' }}
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/kustomize
+          kustomize version
+
+      - name: Update image tags in manifests
+        if: ${{ steps.version.outputs.released == 'true' }}
+        working-directory: manifests/environments/dev
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+          FRONTEND_CHANGED: ${{ needs.changes.outputs.frontend }}
+          BACKEND_CHANGED: ${{ needs.changes.outputs.backend }}
+          GLOBAL_CHANGED: ${{ needs.changes.outputs.global }}
+        run: |
+          set -euo pipefail
+
+          echo "Updating manifests to version: ${VERSION}"
+
+          if [ "${FRONTEND_CHANGED}" = "true" ] || [ "${GLOBAL_CHANGED}" = "true" ]; then
+            echo "Updating frontend image"
+            kustomize edit set image \
+              docker.io/${DOCKERHUB_USERNAME}/frontend=docker.io/${DOCKERHUB_USERNAME}/frontend:${VERSION}
+          else
+            echo "Frontend unchanged, skipping"
+          fi
+
+          if [ "${BACKEND_CHANGED}" = "true" ] || [ "${GLOBAL_CHANGED}" = "true" ]; then
+            echo "Updating backend image"
+            kustomize edit set image \
+              docker.io/${DOCKERHUB_USERNAME}/backend=docker.io/${DOCKERHUB_USERNAME}/backend:${VERSION}
+          else
+            echo "Backend unchanged, skipping"
+          fi
+
+      - name: Create pull request in manifests repository
+        if: ${{ steps.version.outputs.released == 'true' }}
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.MANIFESTS_REPO_TOKEN }}
+          path: manifests
+          base: main
+          branch: update-images-${{ steps.version.outputs.version }}
+          delete-branch: true
+          commit-message: "chore: update images to ${{ steps.version.outputs.version }}"
+          title: "Update images to ${{ steps.version.outputs.version }}"
+          body: |
+            Aggiorna i tag Docker alla versione `${{ steps.version.outputs.version }}`.
+
+            Immagini aggiornate automaticamente dalla pipeline del repository applicativo.
+
+            Cambiamenti rilevati:
+            - frontend: `${{ needs.changes.outputs.frontend }}`
+            - backend: `${{ needs.changes.outputs.backend }}`
+            - global: `${{ needs.changes.outputs.global }}`

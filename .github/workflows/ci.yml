@@ -213,7 +213,7 @@ jobs:
 
       - name: Update image tags in manifests
         if: ${{ steps.version.outputs.released == 'true' }}
-        working-directory: manifests/environments/dev
+        working-directory: deploy/my-secure-app/values.yaml
         env:
           VERSION: ${{ steps.version.outputs.version }}
           DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}

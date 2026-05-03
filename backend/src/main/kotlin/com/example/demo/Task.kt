@@ -2,6 +2,7 @@ package com.example.demo
 
 import jakarta.persistence.*
 
+
 @Entity
 @Table(name = "tasks")
 data class Task(

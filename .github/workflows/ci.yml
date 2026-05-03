@@ -96,6 +96,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       # Compile and assemble the project; -x test skips tests
       - name: Build
         run: ./gradlew build -x test

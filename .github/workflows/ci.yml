@@ -199,7 +199,7 @@ jobs:
         if: ${{ steps.version.outputs.released == 'true' }}
         uses: actions/checkout@v4
         with:
-          repository: tua-org/app-manifests
+          repository: LoriGaetani/lab3-cpo-deploy.git
           ref: main
           token: ${{ secrets.MANIFESTS_REPO_TOKEN }}
           path: manifests

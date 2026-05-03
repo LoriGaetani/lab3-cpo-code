@@ -195,6 +195,7 @@ jobs:
       # Update Kubernetes manifests repository
       # ---------------------------------------------------------
 
+
       - name: Checkout manifests repository
         if: ${{ steps.version.outputs.released == 'true' }}
         uses: actions/checkout@v4

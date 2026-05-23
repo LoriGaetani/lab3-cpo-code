@@ -221,7 +221,7 @@ jobs:
           FRONTEND_CHANGED: ${{ needs.changes.outputs.frontend }}
           BACKEND_CHANGED: ${{ needs.changes.outputs.backend }}
           GLOBAL_CHANGED: ${{ needs.changes.outputs.global }}
-          VALUES_FILE: deploy/my-secure-app/values.yaml
+          VALUES_FILE: deploy/charts/my-secure-app/values.yaml
         run: |
           set -euo pipefail
           

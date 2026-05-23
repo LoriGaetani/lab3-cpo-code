@@ -57,7 +57,7 @@ function App() {
   return (
     <div className="app-container">
       <header className="header">
-        <h1>Task Master</h1>
+        <h1>Task Master!!!</h1>
         <p>Stay organized, focused, and productive.</p>
       </header>
 

@@ -18,3 +18,19 @@ spring:
         format_sql: true
 server:
   port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: my-observable-app-backend #tag added to all metrics
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
